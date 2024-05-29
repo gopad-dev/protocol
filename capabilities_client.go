@@ -81,7 +81,9 @@ type WorkspaceClientCapabilities struct {
 	// FileOperations is the client has support for file requests/notifications.
 	//
 	// @since 3.16.0.
-	FileOperations *WorkspaceClientCapabilitiesFileOperations `json:"fileOperations,omitempty"`
+	FileOperations *FileOperationsWorkspaceClientCapabilities `json:"fileOperations,omitempty"`
+
+	InlayHint *InlayHintWorkspaceClientCapabilities `json:"inlayHint,omitempty"`
 }
 
 // WorkspaceClientCapabilitiesWorkspaceEdit capabilities specific to "WorkspaceEdit"s.
@@ -231,10 +233,10 @@ type CodeLensWorkspaceClientCapabilities struct {
 	RefreshSupport bool `json:"refreshSupport,omitempty"`
 }
 
-// WorkspaceClientCapabilitiesFileOperations capabilities specific to the fileOperations.
+// FileOperationsWorkspaceClientCapabilities capabilities specific to the fileOperations.
 //
 // @since 3.16.0.
-type WorkspaceClientCapabilitiesFileOperations struct {
+type FileOperationsWorkspaceClientCapabilities struct {
 	// DynamicRegistration whether the client supports dynamic registration for file
 	// requests/notifications.
 	DynamicRegistration bool `json:"dynamicRegistration,omitempty"`
@@ -256,6 +258,10 @@ type WorkspaceClientCapabilitiesFileOperations struct {
 
 	// WillDelete is the client has support for sending willDeleteFiles requests.
 	WillDelete bool `json:"willDelete,omitempty"`
+}
+
+type InlayHintWorkspaceClientCapabilities struct {
+	RefreshSupport bool `json:"refreshSupport,omitempty"`
 }
 
 // TextDocumentClientCapabilities Text document specific client capabilities.
@@ -358,6 +364,12 @@ type TextDocumentClientCapabilities struct {
 	//
 	// @since 3.16.0.
 	Moniker *MonikerClientCapabilities `json:"moniker,omitempty"`
+
+	InlineValue *InlineValueClientCapabilities `json:"inlineValue,omitempty"`
+
+	InlayHint *InlayHintClientCapabilities `json:"inlayHint,omitempty"`
+
+	Diagnostic *DiagnosticClientCapabilities `json:"diagnostic,omitempty"`
 }
 
 // TextDocumentSyncClientCapabilities defines which synchronization capabilities the client supports.
@@ -952,6 +964,24 @@ type MonikerClientCapabilities struct {
 	// StaticRegistrationOptions)` return value for the corresponding server
 	// capability as well.// DynamicRegistration whether implementation supports dynamic registration. If this is set to
 	DynamicRegistration bool `json:"dynamicRegistration,omitempty"`
+}
+
+type InlineValueClientCapabilities struct {
+	DynamicRegistration bool `json:"dynamicRegistration,omitempty"`
+}
+
+type InlayHintClientCapabilities struct {
+	DynamicRegistration bool                                       `json:"dynamicRegistration,omitempty"`
+	ResolveSupport      *InlayHintClientCapabilitiesResolveSupport `json:"resolveSupport,omitempty"`
+}
+
+type InlayHintClientCapabilitiesResolveSupport struct {
+	Properties []string `json:"properties"`
+}
+
+type DiagnosticClientCapabilities struct {
+	DynamicRegistration    bool `json:"dynamicRegistration,omitempty"`
+	RelatedDocumentSupport bool `json:"relatedDocumentSupport,omitempty"`
 }
 
 // WindowClientCapabilities represents a WindowClientCapabilities specific client capabilities.

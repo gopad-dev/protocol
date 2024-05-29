@@ -3,6 +3,10 @@
 
 package protocol
 
+import (
+	"github.com/segmentio/encoding/json"
+)
+
 // TraceValue represents a InitializeParams Trace mode.
 type TraceValue string
 
@@ -459,3 +463,82 @@ type InitializedParams struct{}
 
 // WorkspaceFolders represents a slice of WorkspaceFolder.
 type WorkspaceFolders []WorkspaceFolder
+
+type InlayHintKind float64
+
+const (
+	InlayHintKindNone      InlayHintKind = 0
+	InlayHintKindType      InlayHintKind = 1
+	InlayHintKindParameter InlayHintKind = 2
+)
+
+type InlayHint struct {
+	Position     Position    `json:"position"`
+	Label        interface{} `json:"label"` // string | []InlayHintLabelPart
+	Kind         *InlayHintKind
+	TextEdits    []TextEdit  `json:"textEdits,omitempty"`
+	Tooltip      interface{} `json:"tooltip,omitempty"` // string | *MarkupContent
+	PaddingLeft  bool        `json:"paddingLeft,omitempty"`
+	PaddingRight bool        `json:"paddingRight,omitempty"`
+	Data         interface{} `json:"data,omitempty"`
+}
+
+func (i *InlayHint) UnmarshalJSON(data []byte) error {
+	type inlayHint InlayHint
+	type fullInlayHint struct {
+		inlayHint
+		Label   json.RawMessage `json:"label"`
+		Tooltip json.RawMessage `json:"tooltip"`
+	}
+	var hint fullInlayHint
+	if err := json.Unmarshal(data, &hint); err != nil {
+		return err
+	}
+
+	if len(hint.Label) == 0 {
+		hint.inlayHint.Label = nil
+	} else if hint.Label[0] == '[' {
+		var parts []InlayHintLabelPart
+		if err := json.Unmarshal(hint.Label, &parts); err != nil {
+			return err
+		}
+		hint.inlayHint.Label = parts
+	} else if hint.Label[0] == '"' {
+		var label string
+		if err := json.Unmarshal(hint.Label, &label); err != nil {
+			return err
+		}
+		hint.inlayHint.Label = label
+	}
+
+	if len(hint.Tooltip) == 0 {
+		hint.inlayHint.Tooltip = nil
+	} else if hint.Tooltip[0] == '"' {
+		var tooltip string
+		if err := json.Unmarshal(hint.Tooltip, &tooltip); err != nil {
+			return err
+		}
+		hint.inlayHint.Tooltip = tooltip
+	} else if hint.Tooltip[0] == '{' {
+		var markup MarkupContent
+		if err := json.Unmarshal(hint.Tooltip, &markup); err != nil {
+			return err
+		}
+		hint.inlayHint.Tooltip = &markup
+	}
+
+	*i = InlayHint(hint.inlayHint)
+	return nil
+}
+
+type InlayHintLabelPart struct {
+	Value    string      `json:"value"`
+	Tooltip  interface{} `json:"tooltip,omitempty"` // string | *MarkupContent
+	Location *Location   `json:"location,omitempty"`
+	Command  *Command    `json:"command,omitempty"`
+}
+
+type InlayHintParams struct {
+	TextDocument TextDocumentIdentifier `json:"textDocument"`
+	Range        Range                  `json:"range"`
+}

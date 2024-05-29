@@ -354,7 +354,7 @@ func TestWorkspaceClientCapabilities(t *testing.T) {
 		CodeLens: &CodeLensWorkspaceClientCapabilities{
 			RefreshSupport: true,
 		},
-		FileOperations: &WorkspaceClientCapabilitiesFileOperations{
+		FileOperations: &FileOperationsWorkspaceClientCapabilities{
 			DynamicRegistration: true,
 			DidCreate:           true,
 			WillCreate:          true,
